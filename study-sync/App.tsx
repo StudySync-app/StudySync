@@ -1,33 +1,48 @@
-import { useEffect } from 'react';
-import { Text, View } from 'react-native';
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import migrations from './drizzle/migrations';
-import { db } from './src/db/client';
-import { supabase } from './src/lib/supabase';
-import { useUserStore } from './src/store/useUserStore';
+import React, { useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-// Temporary placeholder for the main application layout. Replace
-// with your actual navigation or UI hierarchy once it's ready.
-function YourMainAppLayout() {
-  return (
-    <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
-      <Text>Welcome to StudySync!</Text>
-    </View>
-  );
-}
+import MainTabs from "./src/navigation/MainTabs";
+import NewTaskScreen from "./src/screens/NewTaskScreen";
+import { initDatabase } from "./src/db/init";
+
+import * as Notifications from "expo-notifications";
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const { success, error } = useMigrations(db, migrations);
-  const setSession = useUserStore((state) => state.setSession);
 
   useEffect(() => {
-    // Sync Supabase Auth state with Zustand
-    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
-    supabase.auth.onAuthStateChange((_event, session) => setSession(session));
-  }, []);
 
-  if (!success) return <Text>Loading Database...</Text>;
-  if (error) return <Text>Migration Error: {error.message}</Text>;
+  initDatabase();
 
-  return <YourMainAppLayout />;
+  const requestPermission = async () => {
+    await Notifications.requestPermissionsAsync();
+  };
+
+  requestPermission();
+
+}, []);
+
+  return (
+    <NavigationContainer>
+
+      <Stack.Navigator>
+
+        <Stack.Screen
+          name="Home"
+          component={MainTabs}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="NewTask"
+          component={NewTaskScreen}
+          options={{ title: "Create Task" }}
+        />
+
+      </Stack.Navigator>
+
+    </NavigationContainer>
+  );
 }
