@@ -66,7 +66,7 @@ export default function NewTaskScreen({ navigation, route }: any) {
 
     // SAFE reminder
     try {
-      await scheduleTaskReminder(title, dueDate);
+      await scheduleTaskReminder(title, new Date(Date.now() + 10000));
     } catch {
       console.log("Reminder not supported in Expo Go");
     }
@@ -111,7 +111,7 @@ export default function NewTaskScreen({ navigation, route }: any) {
       {showPicker && (
         <DateTimePicker
           value={dueDate}
-          mode="date"
+          mode="datetime"
           onChange={(e, d) => {
             setShowPicker(false);
             if (d) setDueDate(d);
